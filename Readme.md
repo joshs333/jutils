@@ -8,3 +8,8 @@ This utility provides a slightly fancier logging interface than just printing to
 
 ## [KDTrie Utility](docs/kdtrie.md)
 This is intended to provide efficient spatial for nearest neighbor searches over different types of spatial data centered at a given point.
+
+## External Dependencies
+```
+sudo apt install cmake libeigen3-dev
+```

@@ -632,6 +632,9 @@ public:
         const PointDimT& distance,
         const std::size_t num
     ) {
+        if(!base_branch_) {
+            return;
+        }
         KDTRIE_DEBUG("KDtrie(%d, %3.2f).nn(%s, %s, %s)", 
             k_, base_width_, string_format_point("",point).c_str(),
             distance == std::numeric_limits<PointDimT>::max() ?

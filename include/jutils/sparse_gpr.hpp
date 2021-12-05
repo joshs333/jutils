@@ -1,5 +1,5 @@
-#ifndef JUTILS_SPARSE_GPR_H_
-#define JUTILS_SPARSE_GPR_H_
+#ifndef JUTILS_SPARSE_GPR_HPP_
+#define JUTILS_SPARSE_GPR_HPP_
 
 #define JUTILS_SPARSE_GPR_DEBUG_LOGGING
 #include <jutils/logging.hpp>

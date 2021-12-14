@@ -1,7 +1,6 @@
 #ifndef JUTILS_SPARSE_GPR_HPP_
 #define JUTILS_SPARSE_GPR_HPP_
 
-#define JUTILS_SPARSE_GPR_DEBUG_LOGGING
 #include <jutils/logging.hpp>
 #ifdef JUTILS_SPARSE_GPR_DEBUG_LOGGING
     #define GPR_DEBUG(...) JLOGN_NOTE("gpr", ##__VA_ARGS__)
@@ -11,6 +10,7 @@
 
 #include <jutils/kdtrie.hpp>
 #include <Eigen/Core>
+#include <Eigen/LU>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -30,9 +30,24 @@ std::string string_format_matrix(const Eigen::MatrixXd& point) {
 }
 
 struct SquaredExponentialKernel {
-    static double k(const Eigen::MatrixXd& x1, const Eigen::MatrixXd& x2) {
-        return std::exp(-((x1 - x2) * (x1 - x2).transpose())(0,0));
+    SquaredExponentialKernel(
+        double covariance = 0.8,
+        double length = 0.7
+    ):
+        covariance_(covariance),
+        length_(length)
+    {}
+
+    double operator()(const Eigen::MatrixXd& x1, const Eigen::MatrixXd& x2) {
+        return covariance_ * covariance_ * std::exp(
+                -((x1 - x2) * (x1 - x2).transpose())(0,0) 
+                / (2 * length_ * length_)
+            );
     }
+
+private:
+    double covariance_;
+    double length_;
 };
 
 class GPRDataPoint {
@@ -66,7 +81,7 @@ public:
 
     template<typename KernelFunc = SquaredExponentialKernel>
     void link(ID point_id, const Eigen::MatrixXd& point) {
-        auto k = KernelFunc::k(point, x_data_point_);
+        auto k = KernelFunc()(point, x_data_point_);
         GPR_DEBUG("  GRPDataPoint(%lu).link(%lu, %s)",
             point_id_, point_id,
             string_format_matrix(point).c_str()
@@ -115,7 +130,7 @@ public:
     GPR(
         uint8_t x_dim,
         uint8_t y_dim,
-        double inference_distance = 10.0
+        double inference_distance = 10.
     ):
         x_dim_(x_dim),
         y_dim_(y_dim),
@@ -145,6 +160,8 @@ public:
 
         auto new_point = GPRDataPoint::newPtr(current_id_, x_data, y_data);
         data_points_[current_id_] = new_point;
+
+        // std::cout << "Inserting " << x_data << " " << y_data << std::endl;
 
         Trie::NearAssociates near_data_points;
         data_trie_.nn(near_data_points, x_data_vec, inference_distance_ * 2.1);
@@ -182,29 +199,36 @@ public:
 
         GPR_DEBUG("regress(%s)", string_format_matrix(x_data).c_str());
         Trie::NearAssociates near_data_points;
-        data_trie_.nn(near_data_points, x_data_vec, inference_distance_);
+        data_trie_.nn(near_data_points, x_data_vec, 30, inference_distance_);
         GPR_DEBUG("  found %lu relevant data points", near_data_points.size());
 
         Eigen::MatrixXd K(near_data_points.size(), near_data_points.size());
         Eigen::MatrixXd K_star(1, near_data_points.size());
+        // Eigen::MatrixXd X_data(near_data_points.size(), x_dim_);
         Eigen::MatrixXd Y_data(near_data_points.size(), y_dim_);
+        KernelFunc k;
         for(std::size_t i = 0; i < near_data_points.size(); ++i) {
             // std::cout << near_data_points[i].associate->x_data() << std::endl;
-            K_star(0,i) = KernelFunc::k(x_data, near_data_points[i].associate->x_data());
+            K_star(0,i) = k(x_data, near_data_points[i].associate->x_data());
             Y_data.row(i) = near_data_points[i].associate->y_data();
+            // X_data.row(i) = near_data_points[i].associate->x_data();
             K(i,i) = 1.00;
             for(std::size_t j = 0; j < i; ++j) {
                 auto j_id = near_data_points[j].associate->id();
                 if(!near_data_points[i].associate->link_value(j_id, K(i,j))) {
                     GPR_DEBUG("  link_value computation %lu -> %lu failed :(", j_id, near_data_points[i].associate->id());
                 }
+                K(j,i) = K(i,j);
             }
         }
 
-        std::cout << "K*" << std::endl << K_star << std::endl;
-        std::cout << "K" << std::endl << K << std::endl;
-        std::cout << "K-1" << std::endl << K.inverse() << std::endl;
-        std::cout << "Y" << std::endl << Y_data << std::endl;
+        // std::cout << "x* " << x_data << std::endl;
+        // std::cout << "X_data*" << std::endl << X_data << std::endl;
+        // std::cout << "K*" << std::endl << K_star << std::endl;
+        // std::cout << "K" << std::endl << K << std::endl;
+        // std::cout << "K-1" << std::endl << K.inverse() << std::endl;
+        // std::cout << "Y" << std::endl << Y_data << std::endl;
+        // std::cout << "K* @ K-1" << std::endl << K_star * K.inverse() << std::endl;
 
         GPR_DEBUG("  K matrices are generated.");
         y_data = K_star * K.inverse() * Y_data;

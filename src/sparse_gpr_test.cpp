@@ -9,7 +9,7 @@
 #include <Eigen/LU>
 #include <random>
 
-#ifdef ENABLE_MATPLOTLIB
+#ifdef JUTILS_ENABLE_MATPLOTLIB
     #include <matplotlib.h>
     namespace plt = matplotlibcpp;
 #endif
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
     std::cout << "MSE: " << error / x_points.size() << std::endl;
     std::cout << "Mean Inference Time: " << static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(e - s).count()) / x_points.size() << std::endl;
 
-    #ifdef ENABLE_MATPLOTLIB
+    #ifdef JUTILS_ENABLE_MATPLOTLIB
         plt::plot(x_points, y_points);
         plt::plot(x_pred_points, y_pred_points);
         plt::show();

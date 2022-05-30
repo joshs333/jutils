@@ -31,7 +31,7 @@ endif()
 include_directories(include ${PYTHON_INCLUDES})
 
 add_executable(kdtrie_test src/kdtrie_test.cpp)
-add_executable(logging_test src/logging_test.cpp)
+add_executable(logging_test src/logging_test.cpp src/logging.cpp)
 add_executable(threadpool_test src/threadpool_test.cpp)
 add_executable(time_test src/time_test.cpp)
 target_link_libraries(time_test pthread)

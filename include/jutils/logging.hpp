@@ -66,59 +66,59 @@ std::string string_format( const std::string& format, Args ... args )
 namespace term {
     //! Foreground Coloring
     namespace fg {
-        const char* def           = "\033[39m";
-        const char* black         = "\033[30m";
-        const char* red           = "\033[31m";
-        const char* green         = "\033[32m";
-        const char* yellow        = "\033[33m";
-        const char* blue          = "\033[34m";
-        const char* magenta       = "\033[35m";
-        const char* cyan          = "\033[36m";
-        const char* light_gray    = "\033[37m";
-        const char* dark_gray     = "\033[90m";
-        const char* light_red     = "\033[91m";
-        const char* light_green   = "\033[92m";
-        const char* light_yellow  = "\033[93m";
-        const char* light_blue    = "\033[94m";
-        const char* light_magenta = "\033[95m";
-        const char* light_cyan    = "\033[96m";
-        const char* white         = "\033[97m";
+        __attribute__((unused)) static const char* def           = "\033[39m";
+        __attribute__((unused)) static const char* black         = "\033[30m";
+        __attribute__((unused)) static const char* red           = "\033[31m";
+        __attribute__((unused)) static const char* green         = "\033[32m";
+        __attribute__((unused)) static const char* yellow        = "\033[33m";
+        __attribute__((unused)) static const char* blue          = "\033[34m";
+        __attribute__((unused)) static const char* magenta       = "\033[35m";
+        __attribute__((unused)) static const char* cyan          = "\033[36m";
+        __attribute__((unused)) static const char* light_gray    = "\033[37m";
+        __attribute__((unused)) static const char* dark_gray     = "\033[90m";
+        __attribute__((unused)) static const char* light_red     = "\033[91m";
+        __attribute__((unused)) static const char* light_green   = "\033[92m";
+        __attribute__((unused)) static const char* light_yellow  = "\033[93m";
+        __attribute__((unused)) static const char* light_blue    = "\033[94m";
+        __attribute__((unused)) static const char* light_magenta = "\033[95m";
+        __attribute__((unused)) static const char* light_cyan    = "\033[96m";
+        __attribute__((unused)) static const char* white         = "\033[97m";
     } /* fg */
     //! Background Coloring
     namespace bg {
         //! Resets the background to default colors
-        const char* def           = "\033[49m"; // Resets the background to default colors
-        const char* black         = "\033[40m";
-        const char* red           = "\033[41m";
-        const char* green         = "\033[42m";
-        const char* yellow        = "\033[43m";
-        const char* blue          = "\033[44m";
-        const char* magenta       = "\033[45m";
-        const char* cyan          = "\033[46m";
-        const char* light_gray    = "\033[47m";
-        const char* dark_gray     = "\033[100m";
-        const char* light_red     = "\033[101m";
-        const char* light_green   = "\033[102m";
-        const char* light_yellow  = "\033[103m";
-        const char* light_blue    = "\033[104m";
-        const char* light_magenta = "\033[105m";
-        const char* light_cyan    = "\033[106m";
-        const char* white         = "\033[107m";
+        __attribute__((unused)) static const char* def           = "\033[49m"; // Resets the background to default colors
+        __attribute__((unused)) static const char* black         = "\033[40m";
+        __attribute__((unused)) static const char* red           = "\033[41m";
+        __attribute__((unused)) static const char* green         = "\033[42m";
+        __attribute__((unused)) static const char* yellow        = "\033[43m";
+        __attribute__((unused)) static const char* blue          = "\033[44m";
+        __attribute__((unused)) static const char* magenta       = "\033[45m";
+        __attribute__((unused)) static const char* cyan          = "\033[46m";
+        __attribute__((unused)) static const char* light_gray    = "\033[47m";
+        __attribute__((unused)) static const char* dark_gray     = "\033[100m";
+        __attribute__((unused)) static const char* light_red     = "\033[101m";
+        __attribute__((unused)) static const char* light_green   = "\033[102m";
+        __attribute__((unused)) static const char* light_yellow  = "\033[103m";
+        __attribute__((unused)) static const char* light_blue    = "\033[104m";
+        __attribute__((unused)) static const char* light_magenta = "\033[105m";
+        __attribute__((unused)) static const char* light_cyan    = "\033[106m";
+        __attribute__((unused)) static const char* white         = "\033[107m";
     } /* bg */
-    const char* reset       = "\033[0m";
-    const char* bold        = "\033[1m";
-    const char* unbold      = "\033[21m";
-    const char* dim         = "\033[1m";
-    const char* undim       = "\033[22m";
-    const char* underline   = "\033[4m";
-    const char* ununderline = "\033[24m";
-    const char* blink       = "\033[5m";
-    const char* unblink     = "\033[25m";
-    const char* invert      = "\033[7m";
-    const char* uninvert    = "\033[27m";
-    const char* hide        = "\033[8m";
-    const char* unhide      = "\033[27m";
-    const char* clear       = "\033c";
+    __attribute__((unused)) static const char* reset       = "\033[0m";
+    __attribute__((unused)) static const char* bold        = "\033[1m";
+    __attribute__((unused)) static const char* unbold      = "\033[21m";
+    __attribute__((unused)) static const char* dim         = "\033[1m";
+    __attribute__((unused)) static const char* undim       = "\033[22m";
+    __attribute__((unused)) static const char* underline   = "\033[4m";
+    __attribute__((unused)) static const char* ununderline = "\033[24m";
+    __attribute__((unused)) static const char* blink       = "\033[5m";
+    __attribute__((unused)) static const char* unblink     = "\033[25m";
+    __attribute__((unused)) static const char* invert      = "\033[7m";
+    __attribute__((unused)) static const char* uninvert    = "\033[27m";
+    __attribute__((unused)) static const char* hide        = "\033[8m";
+    __attribute__((unused)) static const char* unhide      = "\033[27m";
+    __attribute__((unused)) static const char* clear       = "\033c";
 } /* term */
 
 namespace logging {
@@ -281,6 +281,12 @@ private:
     level current_level_high_;
 
 }; /* class StdoutConsumer */
+
+void t();
+
+inline void f() {
+
+}
 
 //! Consumes logs and writes them to a log file, see Consumer for member-function documentation
 class FileConsumer : public Consumer {

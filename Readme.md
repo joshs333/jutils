@@ -44,3 +44,6 @@ sudo /bin/bash -c "curl https://bootstrap.pypa.io/pip/2.7/get-pip.py | python2.7
 sudo -H pip install matplotlib
 ```
 To Disable add the following option to the cmake command: `-DENABLE_MATPLOTLIB=OFF`
+
+## Doxygen
+Documentation can automatically be generated using doxygen and the doxyfile (`doxygen .doxyfile`).

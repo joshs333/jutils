@@ -282,12 +282,6 @@ private:
 
 }; /* class StdoutConsumer */
 
-void t();
-
-inline void f() {
-
-}
-
 //! Consumes logs and writes them to a log file, see Consumer for member-function documentation
 class FileConsumer : public Consumer {
 public:

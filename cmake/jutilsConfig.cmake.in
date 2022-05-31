@@ -1,5 +1,29 @@
+##
+# Auto-generated cmake configuration file.
+##
 
 @PACKAGE_INIT@
 
+## Setup Dependencies
+include(CMakeFindDependencyMacro)
+find_dependency(Eigen3 3.3)
+
+if(@JUTILS_ENABLE_PLOTTING@)
+  find_dependency(Matplot++)
+  
+  # Remove cxx_std_17 feature from matplot, this conflicts with CUDA versioning
+  get_target_property(EXTLIB_COMPILE_FLAGS Matplot++::matplot INTERFACE_COMPILE_FEATURES)
+  list(REMOVE_ITEM EXTLIB_COMPILE_FLAGS cxx_std_17)
+  set_target_properties(Matplot++::matplot PROPERTIES
+    INTERFACE_COMPILE_FEATURES "${EXTLIB_COMPILE_FLAGS}"
+  )
+endif()
+
+## Setup definitions
+set(JUTILS_ENABLE_CUDA @JUTILS_ENABLE_CUDA@)
+set(JUTILS_ENABLE_PLOTTING @JUTILS_ENABLE_CUDA@)
+
+## Include Targets and helper functions
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@TargetFunctions.cmake")
 check_required_components("@PROJECT_NAME@")

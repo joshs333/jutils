@@ -25,9 +25,6 @@ int main(int argc, char** argv) {
     (void) argc;
     (void) argv;
 
-    jutils::logging::f();
-    jutils::logging::t();
-
     jutils::logging::add_consumer("test_logger", jutils::logging::FileConsumer::newPtr("test", false));
     // jutils::logging::delete_consumer("stdout");
     // jutils::logging::get_consumer("stdout")->set_levels(level::MAX, level::MAX);

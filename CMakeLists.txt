@@ -17,28 +17,25 @@ endif()
 # Includes for installation
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+include(cmake/jutilsTargetFunctions.cmake)
 
 #####################################################################
 ####################### Misc. Project Setup #########################
 #####################################################################
-project(jutils VERSION 0.1 LANGUAGES CXX)
 
 ### OPTIONS
 # Disabling these options might disable certain features
-option(JUTILS_ENABLE_MATPLOTLIB "enable usage of matplotlib for plotting and visualization" ON)
-option(JUTILS_ENABLE_EIGEN "enable the usage of eigen as the linear algebra backbone" ON)
+option(JUTILS_ENABLE_PLOTTING "enable usage of matplot++ for plotting and visualization" ON)
+option(JUTILS_ENABLE_EIGEN "disable the usage of eigen as the linear algebra backbone and any targets requiring it" ON)
+option(JUTILS_ENABLE_CUDA "disable the usage of CUDA in any targets and don't build any CUDA tests / examples" ON)
 option(JUTILS_BUILD_TESTS "build tests" ON)
 
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-
-
-if(ENABLE_EIGEN)
-  find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+if(${JUTILS_ENABLE_CUDA})
+    project(jutils VERSION 0.1 LANGUAGES CXX CUDA)
+else()
+    project(jutils VERSION 0.1 LANGUAGES CXX)
 endif()
-if(ENABLE_MATPLOTLIB)
-  set(PYTHON_INCLUDES /usr/include/python2.7)
-  set(PYTHON_LIBRARIES python2.7)
-endif()
+
 
 ### JControls Target Definitions
 add_library(${PROJECT_NAME} INTERFACE)
@@ -50,7 +47,31 @@ target_include_directories(${PROJECT_NAME} INTERFACE
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
     ${PYTHON_INCLUDES}
 )
-target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen)
+
+# Eigen Linking
+if(${JUTILS_ENABLE_EIGEN})
+    find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+    target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen)
+endif()
+
+# Matplot++ Linking
+if(${JUTILS_ENABLE_PLOTTING})
+    find_package(Matplot++ REQUIRED QUIET)
+
+    # Remove cxx_std_17 feature from matplot, this conflicts with CUDA versioning
+    get_target_property(EXTLIB_COMPILE_FLAGS Matplot++::matplot INTERFACE_COMPILE_FEATURES)
+    list(REMOVE_ITEM EXTLIB_COMPILE_FLAGS cxx_std_17)
+    set_target_properties(Matplot++::matplot PROPERTIES
+        INTERFACE_COMPILE_FEATURES "${EXTLIB_COMPILE_FLAGS}"
+    )
+
+    target_link_libraries(${PROJECT_NAME} INTERFACE Matplot++::matplot)
+endif()
+
+if(${JUTILS_BUILD_TESTS})
+    include(GoogleTest)
+    enable_testing()
+endif()
 
 #####################################################################
 ####################### Executables #################################
@@ -61,21 +82,27 @@ target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen)
 ####################### Tests #######################################
 #####################################################################
 if(${JUTILS_BUILD_TESTS})
-    add_executable(jutils_test_kdtrie src/kdtrie_test.cpp)
-    target_link_libraries(jutils_test_kdtrie jutils)
+    if(${JUTILS_ENABLE_CUDA})
+        jutils_add_test(cuda_interface tests/cuda_interface.cpp)
+        jutils_add_test(shared_ptr tests/shared_ptr.cpp)
+        jutils_add_test(array tests/array.cpp)
+        jutils_add_test(multi_array tests/multi_array.cpp)
+        jutils_add_test(tensor_array tests/tensor_array.cpp)
+    endif()
 
-    add_executable(jutils_test_logging src/logging_test.cpp src/logging.cpp)
-    target_link_libraries(jutils_test_logging jutils)
+    jutils_add_test_no_cuda(cuda_interface_no_cuda tests/cuda_interface_no_cuda.cpp)
+    jutils_add_test_no_cuda(shared_ptr_no_cuda tests/shared_ptr_no_cuda.cpp)
+    jutils_add_test_no_cuda(array_no_cuda tests/array_no_cuda.cpp)
+    jutils_add_test_no_cuda(multi_array_no_cuda tests/multi_array_no_cuda.cpp)
 
-    add_executable(jutils_test_threadpool src/threadpool_test.cpp)
-    target_link_libraries(jutils_test_threadpool jutils)
+    # These aren't unit tests... more examples really
+    jutils_add_executable_no_cuda(jutils_test_kdtrie src/kdtrie_test.cpp)
+    jutils_add_executable_no_cuda(jutils_test_logging src/logging_test.cpp)
+    jutils_add_executable_no_cuda(jutils_test_time src/time_test.cpp)
 
-    add_executable(jutils_test_time src/time_test.cpp)
-    target_link_libraries(jutils_test_time pthread jutils)
-
-    if(ENABLE_EIGEN)
-        add_executable(jutils_test_sparse_gpr src/sparse_gpr_test.cpp)
-        target_link_libraries(jutils_test_sparse_gpr Eigen3::Eigen jutils ${PYTHON_LIBRARIES})
+    if(${JUTILS_ENABLE_EIGEN})
+        jutils_add_executable_no_cuda(jutils_test_sparse_gpr src/sparse_gpr_test.cpp)
+        jutils_add_executable_no_cuda(jutils_test_gpr src/gpr_test.cpp)
     endif()
 endif()
 

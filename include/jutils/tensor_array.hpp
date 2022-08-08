@@ -536,7 +536,7 @@ public:
      * @return const T* pointer to data
      */
     GPU_COMPATIBLE
-    const T* data() const {
+    T* data() const {
         #if ON_GPU
             return device_data_;
         #else
@@ -549,7 +549,7 @@ public:
      * @return const T* pointer to device data
      */
     GPU_COMPATIBLE
-    const T* data_device() const {
+    T* data_device() const {
         return device_data_;
     }
 

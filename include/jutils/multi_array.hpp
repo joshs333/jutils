@@ -138,6 +138,8 @@ public:
         T* base;
         //! Size of this section of memory
         std::size_t size;
+        //! Steps per index
+        std::size_t step_size;
 
         //! Provide an at operator into the memory (probably not used that much)
         GPU_COMPATIBLE
@@ -149,7 +151,7 @@ public:
                 if(index >= size) throw std::out_of_range("index is out of range in multi_array view");
             #endif
 
-            return *(base + index);
+            return *(base + index * step_size);
         }
 
         //! Provide an index operator into the memory
@@ -160,7 +162,7 @@ public:
                 if(index >= size) throw std::out_of_range("index is out of range in multi_array view");
             #endif
 
-            return *(base + index);
+            return *(base + index * step_size);
         }
     }; /* struct view */
 
@@ -444,7 +446,7 @@ public:
      * @return const T* pointer to data
      */
     GPU_COMPATIBLE
-    const T* data() const {
+    T* data() const {
         #if ON_GPU
             return device_data_;
         #else
@@ -457,7 +459,7 @@ public:
      * @return const T* pointer to device data
      */
     GPU_COMPATIBLE
-    const T* data_device() const {
+    T* data_device() const {
         return device_data_;
     }
 
@@ -467,28 +469,32 @@ public:
         std::size_t index_y
     ) const {
         #if ON_GPU
-            return device_data_[index_x * size_y_ + index_y];
+            return device_data_[index_x + index_y * size_x_];
         #else
             if(data_ == nullptr) throw std::runtime_error("data_ == nullptr, unable to index on CPU");
             if(index_x >= size_x_ || index_y >= size_y_) throw std::out_of_range("index is out of range in multi_array");
-            return data_[index_x * size_y_ + index_y];
+            return data_[index_x + index_y * size_x_];
         #endif
     }
+
+
 
     GPU_COMPATIBLE
     view operator[](std::size_t index) const {
         #if ON_GPU
             view result;
-            result.base = device_data_ + index * size_y_;
+            result.base = device_data_ + index;
             result.size = size_y_;
+            result.step_size = size_x_;
             return result;
         #else
             if(data_ == nullptr) throw std::runtime_error("data_ == nullptr, unable to index on CPU");
             if(index >= size_x_) throw std::out_of_range("index is out of range in multi_array");
 
             view result;
-            result.base = data_ + index * size_y_;
+            result.base = data_ + index;
             result.size = size_y_;
+            result.step_size = size_x_;
             return result;
         #endif
     }

@@ -30,12 +30,12 @@ option(JUTILS_ENABLE_EIGEN "disable the usage of eigen as the linear algebra bac
 option(JUTILS_ENABLE_CUDA "disable the usage of CUDA in any targets and don't build any CUDA tests / examples" ON)
 option(JUTILS_BUILD_TESTS "build tests" ON)
 
-if(${JUTILS_ENABLE_CUDA})
-    project(jutils VERSION 0.1 LANGUAGES CXX CUDA)
-else()
-    project(jutils VERSION 0.1 LANGUAGES CXX)
-endif()
+project(jutils VERSION 0.1 LANGUAGES CXX)
 
+if(${JUTILS_ENABLE_CUDA})
+    enable_language(CUDA)
+    message(STATUS "CUDA Version: ${CMAKE_CUDA_COMPILER_VERSION}")
+endif()
 
 ### JControls Target Definitions
 add_library(${PROJECT_NAME} INTERFACE)
@@ -50,7 +50,17 @@ target_include_directories(${PROJECT_NAME} INTERFACE
 
 # Eigen Linking
 if(${JUTILS_ENABLE_EIGEN})
-    find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+    if(NOT ${JUTILS_ENABLE_CUDA})
+        find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+    else()
+        if(${CMAKE_CUDA_COMPILER_VERSION} VERSION_LESS_EQUAL 11.2)
+            find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+        else()
+            find_package(Eigen3 3.4 REQUIRED NO_MODULE)    
+        endif()
+    endif()
+    message(STATUS "Eigen Version: ${EIGEN3_VERSION_STRING}")
+
     target_link_libraries(${PROJECT_NAME} INTERFACE Eigen3::Eigen)
 endif()
 
